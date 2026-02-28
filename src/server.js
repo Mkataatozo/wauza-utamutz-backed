@@ -34,11 +34,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
 // CREATE USERS TABLE
 app.get("/create-users-table", async (req, res) => {
   try {
@@ -106,4 +101,9 @@ app.post("/api/login", async (req, res) => {
       message: "Server error"
     });
   }
+});
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });

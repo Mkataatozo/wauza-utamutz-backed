@@ -11,10 +11,24 @@ app.get("/", (req, res) => {
   res.send("Wauza Utamutz Backend Running 🚀");
 });
 
+// TEST DATABASE
 app.get("/test-db", async (req, res) => {
+  const result = await pool.query("SELECT NOW()");
+  res.json(result.rows);
+});
+
+// REGISTER USER
+app.post("/register", async (req, res) => {
   try {
-    const result = await pool.query("SELECT NOW()");
-    res.json(result.rows);
+    const { name, email, password } = req.body;
+
+    const newUser = await pool.query(
+      "INSERT INTO users (name, email, password) VALUES ($1,$2,$3) RETURNING *",
+      [name, email, password]
+    );
+
+    res.json(newUser.rows[0]);
+
   } catch (err) {
     res.status(500).send(err.message);
   }

@@ -57,3 +57,23 @@ app.get("/create-users-table", async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+// LOGIN USER
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await pool.query(
+      "SELECT * FROM users WHERE email=$1 AND password=$2",
+      [email, password]
+    );
+
+    if (user.rows.length === 0) {
+      return res.status(401).send("Invalid email or password");
+    }
+
+    res.json(user.rows[0]);
+
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});

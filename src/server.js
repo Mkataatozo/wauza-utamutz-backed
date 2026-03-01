@@ -1,8 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const pool = require("./db");
+const { Pool } = require("pg");
+const jwt = require("jsonwebtoken");
 
 const app = express();
+
+const JWT_SECRET = "wauza_utamutz_secret_key";
 
 app.use(cors());
 app.use(express.json());
@@ -54,23 +57,59 @@ app.get("/create-users-table", async (req, res) => {
 });
 // LOGIN USER
 app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
 
-    const user = await pool.query(
+  const { email, password } = req.body;
+
+  try {
+
+    const result = await pool.query(
       "SELECT * FROM users WHERE email=$1 AND password=$2",
       [email, password]
     );
 
-    if (user.rows.length === 0) {
-      return res.status(401).send("Invalid email or password");
+    if(result.rows.length === 0){
+
+      return res.json({
+        success:false,
+        message:"Invalid credentials"
+      });
+
     }
 
-    res.json(user.rows[0]);
+    const user = result.rows[0];
 
-  } catch (err) {
-    res.status(500).send(err.message);
+    // CREATE TOKEN
+    const token = jwt.sign(
+
+      {
+        id:user.id,
+        email:user.email
+      },
+
+      JWT_SECRET,
+
+      {
+        expiresIn:"7d"
+      }
+
+    );
+
+    res.json({
+
+      success:true,
+      message:"Login successful",
+      token:token,
+      user:user
+
+    });
+
   }
+  catch(err){
+
+    res.status(500).json({error:err.message});
+
+  }
+
 });
 app.post("/api/login", async (req, res) => {
   try {

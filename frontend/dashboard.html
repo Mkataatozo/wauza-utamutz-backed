@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+
+<h2>Dashboard</h2>
+
+<p id="welcome"></p>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  window.location.href = "login.html";
+}
+
+document.getElementById("welcome").innerText =
+  "Welcome " + user.name;
+
+function logout() {
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+}
+
+</script>
+
+</body>
+</html>

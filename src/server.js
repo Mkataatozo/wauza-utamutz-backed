@@ -68,46 +68,35 @@ app.post("/login", async (req, res) => {
     );
 
     if(result.rows.length === 0){
-
       return res.json({
         success:false,
         message:"Invalid credentials"
       });
-
     }
 
     const user = result.rows[0];
 
-    // CREATE TOKEN
     const token = jwt.sign(
-
       {
         id:user.id,
         email:user.email
       },
-
       JWT_SECRET,
-
       {
         expiresIn:"7d"
       }
-
     );
 
     res.json({
-
       success:true,
       message:"Login successful",
       token:token,
       user:user
-
     });
 
   }
   catch(err){
-
     res.status(500).json({error:err.message});
-
   }
 
 });

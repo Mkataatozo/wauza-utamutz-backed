@@ -9,6 +9,27 @@ app.use(cors());
 app.use(express.json());
 
 const JWT_SECRET = "wauza_utamutz_secret_key";
+function authenticateToken(req, res, next) {
+
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "Access denied. No token provided." });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+
+    if (err) {
+      return res.status(403).json({ message: "Invalid or expired token." });
+    }
+
+    req.user = user;
+
+    next();
+  });
+}
 
 // DATABASE CONNECTION
 const pool = new Pool({
@@ -122,6 +143,25 @@ app.post("/api/login", async (req, res) => {
       success: false,
       message: err.message,
     });
+  }
+
+});
+app.get("/api/profile", authenticateToken, async (req, res) => {
+
+  try {
+
+    const result = await pool.query(
+      "SELECT id,name,email FROM users WHERE id=$1",
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      user: result.rows[0]
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 
 });

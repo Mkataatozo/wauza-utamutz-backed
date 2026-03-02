@@ -102,29 +102,35 @@ app.post("/api/login", async (req, res) => {
 
     const { email, password } = req.body;
 
+    console.log("Login attempt:", email, password);
+
     const result = await pool.query(
-      "SELECT * FROM users WHERE email=$1 AND password=$2",
-      [email, password]
+      "SELECT * FROM users WHERE email=$1",
+      [email]
     );
 
     if (result.rows.length === 0) {
       return res.status(401).json({
         success: false,
-        message: "Invalid email or password",
+        message: "User not found"
       });
     }
 
     const user = result.rows[0];
 
+    console.log("User from DB:", user);
+
+    if (user.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Wrong password"
+      });
+    }
+
     const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
+      { id: user.id, email: user.email },
       JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
     res.json({
@@ -134,34 +140,16 @@ app.post("/api/login", async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
 
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({
       success: false,
-      message: err.message,
+      message: err.message
     });
-  }
-
-});
-app.get("/api/profile", authenticateToken, async (req, res) => {
-
-  try {
-
-    const result = await pool.query(
-      "SELECT id,name,email FROM users WHERE id=$1",
-      [req.user.id]
-    );
-
-    res.json({
-      success: true,
-      user: result.rows[0]
-    });
-
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 
 });

@@ -2,94 +2,51 @@
 <html>
 <head>
   <title>Dashboard - Wauza Utamutz</title>
-
-  <style>
-
-    body{
-      font-family: Arial;
-      background:#f4f6f8;
-      margin:0;
-    }
-
-    .header{
-      background:#0a66c2;
-      color:white;
-      padding:15px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .container{
-      padding:20px;
-    }
-
-    .card{
-      background:white;
-      padding:20px;
-      border-radius:10px;
-      box-shadow:0 0 10px rgba(0,0,0,0.1);
-      max-width:400px;
-    }
-
-    button{
-      padding:10px 15px;
-      border:none;
-      background:red;
-      color:white;
-      cursor:pointer;
-      border-radius:5px;
-    }
-
-  </style>
-
 </head>
 <body>
 
-<div class="header">
-  <h3>Wauza Utamutz Dashboard</h3>
+<h1>Dashboard</h1>
+<p id="welcome"></p>
 
-  <button onclick="logout()">Logout</button>
-</div>
-
-<div class="container">
-
-  <div class="card">
-
-    <h2 id="welcome"></h2>
-
-    <p id="email"></p>
-
-  </div>
-
-</div>
+<button onclick="logout()">Logout</button>
 
 <script>
+async function loadProfile() {
+  const token = localStorage.getItem("token");
 
-const user = JSON.parse(localStorage.getItem("user"));
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
 
-if(!user){
+  try {
+    const response = await fetch("http://localhost:5000/api/profile", {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
+    const data = await response.json();
+
+    if (data.success) {
+      document.getElementById("welcome").innerText =
+        "Welcome " + data.user.name;
+    } else {
+      window.location.href = "login.html";
+    }
+
+  } catch (error) {
+    window.location.href = "login.html";
+  }
+}
+
+function logout() {
+  localStorage.removeItem("token");
   window.location.href = "login.html";
-
-}else{
-
-  document.getElementById("welcome").innerText =
-    "Welcome, " + user.name;
-
-  document.getElementById("email").innerText =
-    "Email: " + user.email;
-
 }
 
-function logout(){
-
-  localStorage.removeItem("user");
-
-  window.location.href="login.html";
-
-}
-
+loadProfile();
 </script>
 
 </body>

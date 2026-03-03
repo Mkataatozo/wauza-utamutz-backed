@@ -1,9 +1,15 @@
 <script>
-    const token = localStorage.getItem("token");
+document.addEventListener("DOMContentLoaded", function () {
 
-    if (!token) {
-        window.location.href = "/login.html";
-    }
+  const token = localStorage.getItem("token");
+
+  console.log("Token in dashboard:", token);
+
+  if (!token) {
+    window.location.href = "login.html";
+  }
+
+});
 </script>
 <!DOCTYPE html>
 <html>
